@@ -3,47 +3,55 @@ package loadtester
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
-	"slices"
 	"strings"
 	"time"
 )
 
-type Report struct {
+type report struct {
 	Successes int
 	Failures  int
-	// having start and end as times is almost useless IMO, so I make them strings
-	Start   string
-	End     string
+	//I'm keeping the times as times here, but you can change them if you think making them strings looks better
+	Start   time.Time
+	End     time.Time
 	Elapsed time.Duration
 }
 
 func GenerateReport(url string, method string, attempts int) string {
-	var report Report
-	var allowed_methods = []string{"GET", "POST", "PUT", "PATCH", "DELETE"}
-	if !slices.Contains(allowed_methods, strings.ToUpper(method)) {
-		log.Fatal("This is not a valid HTTP method.")
-	}
-	start := time.Now()
-	report.Start = start.String()
+	var report report
+	httpMethod := strings.ToUpper(method)
+	// start := time.Now()
+	report.Start = time.Now()
 	for i := 0; i < attempts; i++ {
-		res, err := http.Get(url)
-		if err != nil {
-			fmt.Println(err)
-			// break
-			//Conveniently, all of our failed statuses are 400 and above
-		} else if res.StatusCode >= 400 {
-			fmt.Println(res)
-			report.Failures += 1
-		} else {
-			report.Successes += 1
+		switch httpMethod {
+		case "GET":
+			res, err := http.Get(url)
+			if err != nil {
+				fmt.Println(err)
+				// break
+				//Conveniently, all of our failed statuses are 400 and above
+			} else if res.StatusCode >= 400 {
+				fmt.Println(res)
+				report.Failures += 1
+			} else {
+				report.Successes += 1
+			}
+		case "POST":
+			// res, err := http.Post(url, "", nil)
+			return "In progress"
+		case "PUT", "PATCH":
+			return "Go's HTTP module is not quite for this"
+		case "DELETE":
+			return "DELETED!"
 		}
 	}
-	end := time.Now()
-	report.End = end.String()
-	report.Elapsed = time.Duration((end.Sub(start)).Milliseconds())
+	// end := time.Now()
+	report.End = time.Now()
+	report.Elapsed = time.Duration((report.End.Sub(report.Start)).Milliseconds())
+	// This is to make the report look "pretty" when it's logged; we turn it into JSON, then convert that back to a string
 	obj, _ := json.Marshal(report)
 	printedReport := string(obj)
-	return printedReport
+	// Changing the commas to new lines isn't necessary - I just think it looks better
+	printedReport = strings.ReplaceAll(printedReport, ",", ",\n")
+	return strings.ReplaceAll(printedReport, ":", ": ")
 }

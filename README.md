@@ -17,10 +17,12 @@ Now that we have a way to send requests, let's send a bunch of them. We're going
 
 It was at this point where I realized something: I should not be hard coding certain things.
 
-Thanks to how Go handles inputs, you COULD do a "form" wherein you ask for a URL, HTTP method, and a number of times you want to send the requests, but I've found that this can lead to some wild issues.
+Thanks to how Go handles inputs, you COULD do a "form" wherein you ask for a URL, HTTP method, and a number of times you want to send the requests, but I've found that this can lead to some wild issues. Therefore, I decided to do these as command line arguments via the `os` package.
 
-So now that we can make a (bleep) ton of requests, there's one thing we need to think about: that loop makes those requests sequentially, and more often than not, we're not going to see reqests come in in sequence - they're all going to be coming in concurrently. Again, we don't want to end up in a GameStop situation, so we should make sure we can check massive concurrent loads as well.
+So now that we can make a (bleep) ton of requests, there's one thing we need to think about: that loop makes those requests sequentially. Sure, those requests are made in INSANELY rapid succession, but more often than not, we're not going to see reqests come in in sequence in the "real world" - they're going to be coming in concurrently. Again, we don't want to end up in a GameStop situation, so we should make sure we can check massive concurrent loads as well.
 
 Once again, Goroutines are our friend here. 
 
-Now that we've got all of that set up, let's make like baseball and get into some of the advanced stats
+Now that we've got all of that set up, let's make like baseball and get into some of the advanced stats.
+
+Go's `time` package contains a lot of what we need for this, but 
